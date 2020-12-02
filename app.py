@@ -1,4 +1,4 @@
-#
+#Import Programs
 from flask import Flask, jsonify
 import pandas as pd 
 import numpy as np
@@ -8,6 +8,7 @@ from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 
+#Setup Engines and Database
 engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 
 Base = automap_base()
@@ -18,8 +19,10 @@ measurement = Base.classes.measurement
 
 session = Session(engine)
 
+#Setup App with Flask
 app = Flask(__name__)
 
+#Create the Flask Routes
 @app.route("/")
 def welcome():
     return(
@@ -27,9 +30,10 @@ def welcome():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/YYYY-MM-DD<br/>"
-        f"/api/v1.0/YYYY-MM-DD/YYYY-MM-DD")
+        f"/api/v1.0/2016-08-24<br/>"
+        f"/api/v1.0/2016-08-24/2017-08-23")
 
+#Create Session, Query for last year of data, Create Dictionary from list, and Clean results with JSONIFY
 @app.route("/api/v1.0/precipitation")
 def precipitation():
     session = Session(engine)
@@ -94,15 +98,15 @@ def start_date(start):
     start_date_tobs = []
     for min, avg, max in results:
         start_date_tobs_dict = {}
-        start_date_tobs_dict["min_temp"] = min
-        start_date_tobs_dict["avg_temp"] = avg
-        start_date_tobs_dict["max_temp"] = max
+        start_date_tobs_dict["TMIN"] = min
+        start_date_tobs_dict["TAVG"] = avg
+        start_date_tobs_dict["TMAX"] = max
         start_date_tobs.append(start_date_tobs_dict)
 
     return jsonify(start_date_tobs)
 
 @app.route("/api/v1.0/<start>/<end>")
-def start_end(start, end):
+def one_year(start, end):
     session = Session(engine)
 
     results = session.query(func.min(measurement.tobs), func.avg(measurement.tobs), func.max(measurement.tobs)).\
@@ -110,15 +114,15 @@ def start_end(start, end):
     
     session.close()
 
-    start_date_tobs = []
+    one_year_tobs = []
     for min, avg, max in results:
-        start_date_tobs_dict = {}
-        start_date_tobs_dict["min_temp"] = min
-        start_date_tobs_dict["avg_temp"] = avg
-        start_date_tobs_dict["max_temp"] = max
-        start_date_tobs.append(start_date_tobs_dict)
+        one_year_tobs_dict = {}
+        one_year_tobs_dict["TMIN"] = min
+        one_year_tobs_dict["TAVG"] = avg
+        one_year_tobs_dict["TMAX"] = max
+        one_year_tobs.append(one_year_tobs_dict)
 
-    return jsonify(start_date_tobs)
+    return jsonify(one_year_tobs)
 
 if __name__ == "__main__":
     app.run(debug=True)
