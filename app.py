@@ -5,7 +5,7 @@ import numpy as np
 import sqlalchemy
 import datetime as dt
 from sqlalchemy.ext.automap import automap_base
-from sqlalchemy.orm import session
+from sqlalchemy.orm import Session
 from sqlalchemy import create_engine, func
 
 engine = create_engine("sqlite:///Resources/hawaii.sqlite")
@@ -27,8 +27,8 @@ def welcome():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/<start><br/>"
-        f"/api/v1.0/<start>/<end>")
+        f"/api/v1.0/YYYY-MM-DD<br/>"
+        f"/api/v1.0/YYYY-MM-DD/YYYY-MM-DD")
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
@@ -52,7 +52,7 @@ def precipitation():
 def stations():
     session = Session(engine)
 
-    results = session.query(Station.station).order_by(Station.station).all()
+    results = session.query(station.station).order_by(station.station).all()
 
     session.close()
 
@@ -91,15 +91,15 @@ def start_date(start):
 
     session.close()
 
-start_date_tobs = []
-for min, avg, max in results:
-    start_date_tobs_dict = {}
-    start_date_tobs_dict["min_temp"] = min
-    start_date_tobs_dict["avg_temp"] = avg
-    start_date_tobs_dict["max_temp"] = max
-    start_date_tobs.append(start_date_tobs_dict)
+    start_date_tobs = []
+    for min, avg, max in results:
+        start_date_tobs_dict = {}
+        start_date_tobs_dict["min_temp"] = min
+        start_date_tobs_dict["avg_temp"] = avg
+        start_date_tobs_dict["max_temp"] = max
+        start_date_tobs.append(start_date_tobs_dict)
 
-return jsonify(start_date_tobs)
+    return jsonify(start_date_tobs)
 
 @app.route("/api/v1.0/<start>/<end>")
 def start_end(start, end):
@@ -110,7 +110,7 @@ def start_end(start, end):
     
     session.close()
 
-    start_end_tobs = []
+    start_date_tobs = []
     for min, avg, max in results:
         start_date_tobs_dict = {}
         start_date_tobs_dict["min_temp"] = min
@@ -118,7 +118,7 @@ def start_end(start, end):
         start_date_tobs_dict["max_temp"] = max
         start_date_tobs.append(start_date_tobs_dict)
 
-return jsonify(start_date_tobs)
+    return jsonify(start_date_tobs)
 
 if __name__ == "__main__":
     app.run(debug=True)
